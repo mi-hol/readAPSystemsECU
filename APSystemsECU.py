@@ -20,8 +20,8 @@ class APSystemsInvalidInverter(Exception):
 
 class APSystemsECU:
 
-    def __init__(self, ipaddr, port=8899, raw_ecu=None, raw_inverter=None):
-        self.ipaddr = ipaddr
+    def __init__(self, ip_addr, port=8899, raw_ecu=None, raw_inverter=None):
+        self.ip_addr = ip_addr
         self.port = port
 
         # what do we expect socket data to end in
@@ -103,7 +103,7 @@ class APSystemsECU:
             await self.async_close_socket()
             msg = "Timeout after {self.timeout}s waiting or ECU data cmd={cmd.rstrip()}. Closing socket."
             self.add_error(msg)
-            raise APSystemsInvalidData(error)
+            raise APSystemsInvalidData(msg)
 
     async def async_close_socket(self):
         if self.socket_open:
@@ -112,9 +112,9 @@ class APSystemsECU:
             self.socket_open = False
 
     async def async_open_socket(self):
-        _LOGGER.debug(f"Connecting to ECU on {self.ipaddr} {self.port}")
-        self.reader, self.writer = await asyncio.open_connection(self.ipaddr, self.port)
-        _LOGGER.debug(f"Connected to ECU {self.ipaddr} {self.port}")
+        _LOGGER.debug(f"Connecting to ECU on {self.ip_addr} {self.port}")
+        self.reader, self.writer = await asyncio.open_connection(self.ip_addr, self.port)
+        _LOGGER.debug(f"Connected to ECU {self.ip_addr} {self.port}")
         self.socket_open = True
 
 
@@ -158,8 +158,8 @@ class APSystemsECU:
         try:
             return int(binascii.b2a_hex(codec[(start):(start+2)]), 16)
         except ValueError as err:
-            debugdata = binascii.b2a_hex(codec)
-            error = f"Unable to convert binary to int location={start} data={debugdata}"
+            debug_data = binascii.b2a_hex(codec)
+            error = f"Unable to convert binary to int location={start} data={debug_data}"
             self.add_error(error)
             raise APSystemsInvalidData(error)
  
@@ -167,8 +167,8 @@ class APSystemsECU:
         try:
             return int(binascii.b2a_hex(codec[(start):(start+1)]), 8)
         except ValueError as err:
-            debugdata = binascii.b2a_hex(codec)
-            error = f"Unable to convert binary to short int location={start} data={debugdata}"
+            debug_data = binascii.b2a_hex(codec)
+            error = f"Unable to convert binary to short int location={start} data={debug_data}"
             self.add_error(error)
             raise APSystemsInvalidData(error)
 
@@ -176,8 +176,8 @@ class APSystemsECU:
         try:
             return int (binascii.b2a_hex(codec[(start):(start+4)]), 16)
         except ValueError as err:
-            debugdata = binascii.b2a_hex(codec)
-            error = f"Unable to convert binary to double location={start} data={debugdata}"
+            debug_data = binascii.b2a_hex(codec)
+            error = f"Unable to convert binary to double location={start} data={debug_data}"
             self.add_error(error)
             raise APSystemsInvalidData(error)
     
@@ -191,22 +191,22 @@ class APSystemsECU:
         return str(codec[start:(start+amount)])[2:(amount+2)]
     
     def aps_timestamp(self, codec, start, amount):
-        timestr=str(binascii.b2a_hex(codec[start:(start+amount)]))[2:(amount+2)]
-        return timestr[0:4]+"-"+timestr[4:6]+"-"+timestr[6:8]+" "+timestr[8:10]+":"+timestr[10:12]+":"+timestr[12:14]
+        time_str=str(binascii.b2a_hex(codec[start:(start+amount)]))[2:(amount+2)]
+        return time_str[0:4]+"-"+time_str[4:6]+"-"+time_str[6:8]+" "+time_str[8:10]+":"+time_str[10:12]+":"+time_str[12:14]
 
     def check_ecu_checksum(self, data, cmd):
-        datalen = len(data) - 1
+        data_len = len(data) - 1
         try:
             checksum = int(data[5:9])
         except ValueError as err:
-            debugdata = binascii.b2a_hex(data)
-            error = f"Error getting checksum int from '{cmd}' data={debugdata}"
+            debug_data = binascii.b2a_hex(data)
+            error = f"Error getting checksum int from '{cmd}' data={debug_data}"
             self.add_error(error)
             raise APSystemsInvalidData(error)
 
-        if datalen != checksum:
-            debugdata = binascii.b2a_hex(data)
-            error = f"Checksum on '{cmd}' failed checksum={checksum} datalen={datalen} data={debugdata}"
+        if data_len != checksum:
+            debug_data = binascii.b2a_hex(data)
+            error = f"Checksum on '{cmd}' failed checksum={checksum} data_len={data_len} data={debug_data}"
             self.add_error(error)
             raise APSystemsInvalidData(error)
 
@@ -214,14 +214,14 @@ class APSystemsECU:
         end_str = self.aps_str(data, len(data) - 4, 3)
 
         if start_str != 'APS':
-            debugdata = binascii.b2a_hex(data)
-            error = f"Result on '{cmd}' incorrect start signature '{start_str}' != APS data={debugdata}"
+            debug_data = binascii.b2a_hex(data)
+            error = f"Result on '{cmd}' incorrect start signature '{start_str}' != APS data={debug_data}"
             self.add_error(error)
             raise APSystemsInvalidData(error)
 
         if end_str != 'END':
-            debugdata = binascii.b2a_hex(data)
-            error = f"Result on '{cmd}' incorrect end signature '{end_str}' != END data={debugdata}"
+            debug_data = binascii.b2a_hex(data)
+            error = f"Result on '{cmd}' incorrect end signature '{end_str}' != END data={debug_data}"
             self.add_error(error)
             raise APSystemsInvalidData(error)
 
@@ -284,7 +284,7 @@ class APSystemsECU:
         output["inverters"] = {}
 
         # this is the start of the loop of inverters
-        istr = ''
+        inverter_type = ''
         cnt2 = self.inverter_byte_start
         signal = self.process_signal_data()
         inverters = {}
@@ -294,18 +294,18 @@ class APSystemsECU:
             inverter_uid = self.aps_uid(data, cnt2)
             inv["uid"] = inverter_uid
             inv["online"] = bool(self.aps_short(data, cnt2 + 6))
-            istr = self.aps_str(data, cnt2 + 7, 2)
+            inverter_type = self.aps_str(data, cnt2 + 7, 2)
             inv["signal"] = signal.get(inverter_uid, 0)
             inv["frequency"] = self.aps_int(data, cnt2 + 9) / 10
             inv["temperature"] = self.aps_int(data, cnt2 + 11) - 100
             # data supplied varies by InverterType!
-            if istr == '01' or istr == '04':
+            if inverter_type == '01' or inverter_type == '04':
                 (channel_data, cnt2) = self.process_yc600_ds3(data, cnt2)
                 inv.update(channel_data)    
-            elif istr == '02':
+            elif inverter_type == '02':
                 (channel_data, cnt2) = self.process_yc1000(data, cnt2)
                 inv.update(channel_data)
-            elif istr == '03':
+            elif inverter_type == '03':
                 (channel_data, cnt2) = self.process_qs1(data, cnt2)
                 inv.update(channel_data)
             else:
@@ -352,18 +352,23 @@ class APSystemsECU:
         return (output, cnt2)
 
     def process_yc600_ds3(self, data, cnt2):
-        print ("process_yc600_ds3 data:", data)
+        print ("process_yc600_ds3")
+        print ("cnt2:", cnt2)
+        # print ("data:", data)
+        print(f"data(hex): {data.hex()}")
         power = []
         voltages = []
+        currents = []
         power.append(self.aps_int(data, cnt2 + 13))
         voltages.append(self.aps_int(data, cnt2 + 15))
         power.append(self.aps_int(data, cnt2 + 17))
         voltages.append(self.aps_int(data, cnt2 + 19))
         output = {
-            "model" : "YC60/DS3-S-M-D-L",
-            "channel_qty" : 2,
+            "model" : "YC600/DS3 [-S-M-D-L]",
+            "MPPT_channel_qty" : 2,
             "DC_power" : power,
             "DC_voltage" : voltages,
+            "DC_current" : currents,
         }
         return (output, cnt2)
 

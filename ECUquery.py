@@ -12,8 +12,8 @@ from pprint import pprint
 
 class APSystemsECU:
 
-    def __init__(self, ipaddr, port=8899, raw_ecu=None, raw_inverter=None):
-        self.ipaddr = ipaddr
+    def __init__(self, ip_addr, port=8899, raw_ecu=None, raw_inverter=None):
+        self.ip_addr = ip_addr
         self.port = port
 
         self.recv_size = 2048
@@ -43,7 +43,7 @@ class APSystemsECU:
 
     def query_ecu(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((self.ipaddr,self.port))
+        sock.connect((self.ip_addr,self.port))
 
         sock.send(self.ecu_query.encode('utf-8'))
         self.ecu_raw_data = sock.recv(self.recv_size)
@@ -58,7 +58,7 @@ class APSystemsECU:
             ecu_id = self.ecu_id
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((self.ipaddr,self.port))
+        sock.connect((self.ip_addr,self.port))
         cmd = self.inverter_query_prefix + self.ecu_id + self.inverter_query_suffix
         sock.send(cmd.encode('utf-8'))
 
@@ -85,8 +85,8 @@ class APSystemsECU:
         return str(codec[start:(start+amount)])[2:(amount+2)]
     
     def aps_timestamp(self, codec, start, amount):
-        timestr=str(binascii.b2a_hex(codec[start:(start+amount)]))[2:(amount+2)]
-        return timestr[0:4]+"-"+timestr[4:6]+"-"+timestr[6:8]+" "+timestr[8:10]+":"+timestr[10:12]+":"+timestr[12:14]
+        time_str=str(binascii.b2a_hex(codec[start:(start+amount)]))[2:(amount+2)]
+        return time_str[0:4]+"-"+time_str[4:6]+"-"+time_str[6:8]+" "+time_str[8:10]+":"+time_str[10:12]+":"+time_str[12:14]
 
     def process_ecu_data(self, data=None):
         if not data:

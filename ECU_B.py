@@ -24,10 +24,10 @@ Timestamp = 0
 SolarGeneration = 0
 SwitchInverter1 = 0
 SwitchInverter2 = 0
-ConsumptionPannel1 = 0  #Inverter 1
-ConsumptionPannel2 = 0  #Inverter 1
-ConsumptionPannel3 = 0  #Inverter 1 or 2
-ConsumptionPannel4 = 0  #Inverter 1 or 2
+ConsumptionPanel1 = 0  #Inverter 1
+ConsumptionPanel2 = 0  #Inverter 1
+ConsumptionPanel3 = 0  #Inverter 1 or 2
+ConsumptionPanel4 = 0  #Inverter 1 or 2
 TemperatureInverter1 = 0
 TemperatureInverter2 = 0
 SignalInverter1 = 0
@@ -41,7 +41,7 @@ FrequencyInverter2 = 0
 
 #Communication delay to ECU (sec)
 
-puntcomma = '\u003B'
+semicolon = '\u003B'
 loop = asyncio.get_event_loop()
 ecu = APSystemsECU(ecu_ip)
 
@@ -58,15 +58,15 @@ print('Today energy : ' + today_energy + ' kWh')
 current_power = str(data.get('current_power'))
 # Todo: correct AC power extraction
 print('Current total power (DC): ' + current_power + ' W')
-#generated_energy = (current_power + puntcomma + lifetime_energy)
+#generated_energy = (current_power + semicolon + lifetime_energy)
 print('Total energy : ' + lifetime_energy + ' kWh')
 
 """ 
    if (float(today_energy) >= 0 or float(current_power) >= 0):
-   getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': SolarGeneration, 'svalue': (generated_energy)}
+   getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': SolarGeneration, 'str_value': (generated_energy)}
    webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
-   print(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
-getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': Timestamp, 'svalue': data.get('timestamp') + ' / ' + data.get('ecu_firmware')}
+   print(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
+getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': Timestamp, 'str_value': data.get('timestamp') + ' / ' + data.get('ecu_firmware')}
 webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
 print(url + urllib.parse.urlencode(getVars))
  """
@@ -91,7 +91,7 @@ for i in range(Inverter_qty):
    voltage = data['inverters'][Inverter]['DC_voltage'][0]
    # ToDo: correct DC voltage extraction for inverter
    # add DC current
-   print('Voltage inverter (AC) ' + str(i + 1) + ' panel ' + str(1) + ': ' + str(voltage) + ' V')
+   print('Inverter voltage (AC): ' + str(voltage) + ' V')
    for x in range(nPower):
       power = data['inverters'][Inverter]['DC_power'][x]
       print('Power (DC) panel ' + str(x + 1) + ': ' + str(power) + ' W')
@@ -100,54 +100,54 @@ for i in range(Inverter_qty):
       #upload values to Domoticz for inverter 1
       if (i == 0) and (x == 0) :
          if (float(InverterTemperature) > 0):
-            getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': TemperatureInverter1, 'svalue': InverterTemperature}
+            getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': TemperatureInverter1, 'str_value': InverterTemperature}
             webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
          if (float(InverterFrequency) > 0):
-            getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': FrequencyInverter1, 'svalue': InverterFrequency}
+            getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': FrequencyInverter1, 'str_value': InverterFrequency}
             webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': SignalInverter1, 'svalue': InverterSignal}
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': SignalInverter1, 'str_value': InverterSignal}
          webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
          if (float(voltage) > 0):
-            getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': VoltageInverter1, 'svalue': (voltage)}
-            webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+            getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': VoltageInverter1, 'str_value': (voltage)}
+            webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
          if InverterOnline == True :
-            getVars = {'type' : 'command', 'param' : 'switchlight', 'idx': SwitchInverter1, 'switchcmd': 'On'}
+            getVars = {'type' : 'command', 'param' : 'switch_light', 'idx': SwitchInverter1, 'switch_cmd': 'On'}
          else :
-            getVars = {'type' : 'command', 'param' : 'switchlight', 'idx': SwitchInverter1, 'switchcmd': 'Off'}
+            getVars = {'type' : 'command', 'param' : 'switch_light', 'idx': SwitchInverter1, 'switch_cmd': 'Off'}
          webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': ConsumptionPannel1, 'svalue': (power)}
-         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': ConsumptionPanel1, 'str_value': (power)}
+         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
       elif (i == 0) and (x == 1) :
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': ConsumptionPannel2, 'svalue': (power)}
-         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': ConsumptionPanel2, 'str_value': (power)}
+         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
       elif (i == 0) and (x == 2) :
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': ConsumptionPannel3, 'svalue': (power)}
-         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': ConsumptionPanel3, 'str_value': (power)}
+         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
       elif (i == 0) and (x == 3) :
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': ConsumptionPannel4, 'svalue': (power)}
-         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': ConsumptionPanel4, 'str_value': (power)}
+         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
 
      #upload values to Domoticz for inverter 2
       if (i == 1) and (x == 0) :
          if (float(InverterTemperature) > 0):
-            getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': TemperatureInverter2, 'svalue': InverterTemperature}
+            getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': TemperatureInverter2, 'str_value': InverterTemperature}
             webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
          if (float(InverterFrequency) > 0):
-            getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': FrequencyInverter2, 'svalue': InverterFrequency}
+            getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': FrequencyInverter2, 'str_value': InverterFrequency}
             webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': SignalInverter2, 'svalue': InverterSignal}
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': SignalInverter2, 'str_value': InverterSignal}
          webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
          if (float(voltage) > 0):
-            getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': VoltageInverter2, 'svalue': (voltage)}
-            webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+            getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': VoltageInverter2, 'str_value': (voltage)}
+            webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
          if InverterOnline == True :
-            getVars = {'type' : 'command', 'param' : 'switchlight', 'idx': SwitchInverter2, 'switchcmd': 'On'}
+            getVars = {'type' : 'command', 'param' : 'switch_light', 'idx': SwitchInverter2, 'switch_cmd': 'On'}
          else :
-            getVars = {'type' : 'command', 'param' : 'switchlight', 'idx': SwitchInverter2, 'switchcmd': 'Off'}
+            getVars = {'type' : 'command', 'param' : 'switch_light', 'idx': SwitchInverter2, 'switch_cmd': 'Off'}
          webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars))
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': ConsumptionPannel3, 'svalue': (power)}
-         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': ConsumptionPanel3, 'str_value': (power)}
+         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
       elif (i == 1) and (x == 1) :
-         getVars = {'type' : 'command', 'param' : 'udevice', 'nvalue' : 0, 'idx': ConsumptionPannel4, 'svalue': (power)}
-         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (puntcomma) + '0')
+         getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': ConsumptionPanel4, 'str_value': (power)}
+         webUrl = urllib.request.urlopen(url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
  """
