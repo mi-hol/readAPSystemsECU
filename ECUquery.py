@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# source: ??  
+# source: https://community.home-assistant.io/t/apsystems-aps-ecu-r-local-inverters-data-pull/260835/19  
 # likely original source:  https://github.com/Doudou14/Domoticz-apsystems_ecu/blob/main/ECU/APSystemsECU.py
 
 import socket
@@ -95,6 +95,7 @@ class APSystemsECU:
         if len(data) < 16:
             raise Exception("ECU query didn't return minimum 16 bytes, no inverters active.")
 
+        print(f"ECU data: {data.hex()}")
         self.ecu_id = self.aps_str(data, 13, 12)
         self.qty_of_inverters = self.aps_int(data, 46)
         self.firmware = self.aps_str(data, 55, 15)
@@ -103,6 +104,8 @@ class APSystemsECU:
     def process_inverter_data(self, data=None):
         if not data:
             data = self.inverter_raw_data
+
+        print(f"Inverter data: {data.hex()}")
 
         output = {}
 
@@ -139,32 +142,34 @@ class APSystemsECU:
 
             # a YC600 starts with 4080
             if inverter_uid.startswith("4080"):
+                Input_channel_qty = 2
                 (channel_data, location) = self.process_yc600(data, location)
                 inv.update(channel_data)    
 
             # a QS1 starts with 8020
             elif inverter_uid.startswith("8020"):
+                Input_channel_qty = 4
                 (channel_data, location) = self.process_qs1(data, location)
                 inv.update(channel_data)    
 
             # a DS3S starts with 7020
             elif inverter_uid.startswith("7020"):
+                Input_channel_qty = 2
                 (channel_data, location) = self.process_ds3(data, location)
                 inv.update(channel_data)    
 
             # a DS3M starts with 7070
             elif inverter_uid.startswith("7070"):
+                Input_channel_qty = 2
                 (channel_data, location) = self.process_ds3(data, location)
                 inv.update(channel_data)    
 
             inverters.append(inv)
 
         total_power = 0
-        for i in inverters:
-            # ToDo: fix index ["power"]  triggers error below , if label is renamed!!
-            for p in i["power"]:
-                total_power += p
-
+        for inv in inverters:
+            if "power_dc" in inv:
+                total_power += sum(inv["power_dc"])
 
         output["total_power (DC)"] = total_power
         output["inverters"] = inverters
@@ -195,7 +200,7 @@ class APSystemsECU:
         output = {
             "model" : "QS1",
             "channel_qty" : 4,
-            "power" : power,
+            "power_DC" : power,
             "voltage" : voltages
         }
 
@@ -216,7 +221,7 @@ class APSystemsECU:
         output = {
             "model" : "YC600",
             "channel_qty" : 2,
-            "power" : power,
+            "power_dc" : power,
             "voltage" : voltages,
         }
 
@@ -229,21 +234,25 @@ class APSystemsECU:
         dc_p = []
 
         for i in range(0, 2):
+            #Appends the  current value from the data at the current location to the corresponding lists.
+            #Increments the location by 2 to move to the next data point.
+
             power.append(self.aps_int(data, location))
             location += 2
 
             voltages.append(self.aps_int(data, location))
             location += 2
 
+            dc_i.append(self.aps_int(data, location))
+            location += 2
+
+            #dc_p.append(self.aps_int(data, location))
+            #location += 2
+
         output = {
             "model" : "DS3",
             "channel_qty" : 2,
-            "power" : power,
-            # "AC power" : power,
-            # triggers error in line 164, in process_inverter_data 
-            # for p in i["power"]:
-            # ~^^^^^^^^^
-            #    KeyError: 'power'
+            "power_dc" : power,
             "AC voltage" : voltages
         }
 
@@ -252,7 +261,7 @@ class APSystemsECU:
 
 if __name__ == "__main__":
 
-    # supply the correct IP address here
+    # ToDo: enter the correct IP address of ECU below
     ecu = APSystemsECU("192.168.0.248")
 
     # get inverter data by querying the ecu directly
@@ -262,6 +271,41 @@ if __name__ == "__main__":
     
     data = ecu.query_inverters()
     print(json.dumps(data, indent=2))
+
+    # sample_ecu_data   = bytes.fromhex('41505331313030393430303031323136333030303037303034303100004df3000001a900000136d0d0d0d0d0d0d00001000131303031324543555f425f312e322e33333030394574632f474d542d3880971b02db59000000000000454e440a')
+    # expect:
+    #   ECU : 216300007004
+    #   Firmware : ECU_B_1.2.33009
+    #   TZ : Etc/GMT-8
+    #   Qty of inverters : 1
+
+    # sample_ds3_data   = bytes.fromhex('415053313130303530303030323030303100012024091312593270200099999901303101f3009700d300f000d600f0454e440a')
+    # expect: 
+    #   "timestamp": "2024-09-13 12:59:32"
+#       "uid": "702000999999",
+#       "online": true,
+#       "unknown": "01",
+#       "AC frequency": 49.9,
+#       "temperature": 51,
+#       "model": "DS3",
+#       "channel_qty": 2,
+#       "power_dc": [
+#         211,
+#         214    # todo: fix wrong 240
+#       ],
+#       "AC voltage": [
+#         240,
+#         240 # todo: fix wrong
+#       ]
+#     }
+#   ],
+#   "total_power (DC)": 425     # todo: fix wrong 451
+# }
+
+# todo add:
+#  DC-V_1: 44.4 DC-V_2: 43.3 
+#  DC-I_1: 5.8  DC-I_2: 6.0 
+#  AC-P: 403
 
 
     # sample_yc600_data = bytes.fromhex('415053313130313736303030323030303100072020112412051040800009401601303101f3006f001400e4001400e440800009562201303101f3006f001300e4001400e440800009182601303101f3006f001400e3001400e340800009293301303101f3006f001400e3001300e340800009191301303101f3006f001500e3001400e340800009243401303101f3006f001400e3001400e340800009184001303101f3006f001400e2001400e2454e440a')
