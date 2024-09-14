@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # original source: https://github.com/Doudou14/Domoticz-apsystems_ecu/blob/main/ECU/ECU_B.py
-# important findings of reverse engineering of APSystems ECU are in https://community.home-assistant.io/t/apsystems-aps-ecu-r-local-inverters-data-pull/260835/238
+# important findings reverse engineering APSystems ECU communication are in https://community.home-assistant.io/t/apsystems-aps-ecu-r-local-inverters-data-pull/260835/238
  
 from APSystemsECU import APSystemsECU
 import time
@@ -48,7 +48,7 @@ ecu = APSystemsECU(ecu_ip)
 data = loop.run_until_complete(ecu.async_query_ecu())
 
 #to debug data sent via JSON uncomment pprint
-#pprint(data)
+pprint(data)
 
 #lifetime_energy = str(data.get('lifetime_energy')*1000)
 lifetime_energy = str(data.get('lifetime_energy'))
@@ -57,7 +57,7 @@ today_energy = str(data.get('today_energy'))
 print('Today energy : ' + today_energy + ' kWh')
 current_power = str(data.get('current_power'))
 # Todo: correct AC power extraction
-print('Current power (AC): ' + current_power + ' W')
+print('Current total power (DC): ' + current_power + ' W')
 #generated_energy = (current_power + puntcomma + lifetime_energy)
 print('Total energy : ' + lifetime_energy + ' kWh')
 
@@ -86,15 +86,15 @@ for i in range(Inverter_qty):
    print('Signal: ' + str(InverterSignal) + ' %')
    InverterTemperature = data['inverters'][Inverter]['temperature']
    print('Temperature: ' + str(InverterTemperature) + ' °C')
-   nPower = len(data['inverters'][Inverter]['power'])
-   nVoltage = len(data['inverters'][Inverter]['voltage'])
-   voltage = data['inverters'][Inverter]['voltage'][0]
-   # ToDo: correct DC voltage extraction
+   nPower = len(data['inverters'][Inverter]['DC_power'])
+   nVoltage = len(data['inverters'][Inverter]['DC_voltage'])
+   voltage = data['inverters'][Inverter]['DC_voltage'][0]
+   # ToDo: correct DC voltage extraction for inverter
    # add DC current
-   print('Voltage inverter (DC) ' + str(i + 1) + ' panel ' + str(1) + ': ' + str(voltage) + ' V')
+   print('Voltage inverter (AC) ' + str(i + 1) + ' panel ' + str(1) + ': ' + str(voltage) + ' V')
    for x in range(nPower):
-      power = data['inverters'][Inverter]['power'][x]
-      print('Power inverter (DC)' + str(i + 1) + ' panel ' + str(x + 1) + ': ' + str(power) + ' W')
+      power = data['inverters'][Inverter]['DC_power'][x]
+      print('Power (DC) panel ' + str(x + 1) + ': ' + str(power) + ' W')
 
 """
       #upload values to Domoticz for inverter 1

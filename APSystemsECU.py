@@ -298,6 +298,7 @@ class APSystemsECU:
             inv["signal"] = signal.get(inverter_uid, 0)
             inv["frequency"] = self.aps_int(data, cnt2 + 9) / 10
             inv["temperature"] = self.aps_int(data, cnt2 + 11) - 100
+            # data supplied varies by InverterType!
             if istr == '01' or istr == '04':
                 (channel_data, cnt2) = self.process_yc600_ds3(data, cnt2)
                 inv.update(channel_data)    
@@ -351,6 +352,7 @@ class APSystemsECU:
         return (output, cnt2)
 
     def process_yc600_ds3(self, data, cnt2):
+        print ("process_yc600_ds3 data:", data)
         power = []
         voltages = []
         power.append(self.aps_int(data, cnt2 + 13))
@@ -358,10 +360,10 @@ class APSystemsECU:
         power.append(self.aps_int(data, cnt2 + 17))
         voltages.append(self.aps_int(data, cnt2 + 19))
         output = {
-            "model" : "YC60/DS3-D-L",
+            "model" : "YC60/DS3-S-M-D-L",
             "channel_qty" : 2,
-            "power" : power,
-            "voltage" : voltages,
+            "DC_power" : power,
+            "DC_voltage" : voltages,
         }
         return (output, cnt2)
 
