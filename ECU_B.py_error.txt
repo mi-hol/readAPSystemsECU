@@ -1,4 +1,4 @@
-PS C:\Users\mholzer> ."C:\Program Files\Python312\python.exe" "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py"
+PS C:\Users\U1> ."C:\Program Files\Python312\python.exe" "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py"
 C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py:45: DeprecationWarning: There is no current event loop
   loop = asyncio.get_event_loop()
 Traceback (most recent call last):
@@ -45,4 +45,4 @@ Traceback (most recent call last):
   File "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\APSystemsECU.py", line 106, in async_send_read_from_socket
     raise APSystemsInvalidData(msg)
 APSystemsECU.APSystemsInvalidData: Timeout after {self.timeout}s waiting or ECU data cmd={cmd.rstrip()}. Closing socket.
-PS C:\Users\mholzer> ."C:\Program Files\Python312\python.exe" "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py"
+PS C:\Users\U1> ."C:\Program Files\Python312\python.exe" "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py"
