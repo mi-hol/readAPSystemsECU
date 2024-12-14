@@ -61,11 +61,12 @@ lifetime_energy = str(data.get('lifetime_energy'))
 today_energy = str(data.get('today_energy'))
 # Todo: correct AC power extraction
 current_power = str(data.get('current_power'))
-print('Inverter data supplied timestamp : ' + timestamp)
+print('Inverter data timestamp : ' + timestamp)
 print('Current total power (DC): ' + current_power + ' W')
 print('Today energy : ' + today_energy + ' kWh')
 print('Total energy : ' + lifetime_energy + ' kWh')
 
+'''
 if Domoticz_url == '' :
    if (float(today_energy) >= 0 or float(current_power) >= 0):
       getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': SolarGeneration, 'str_value': (today_energy)}
@@ -74,7 +75,7 @@ if Domoticz_url == '' :
 getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': Timestamp, 'str_value': data.get('timestamp') + ' / ' + data.get('ecu_firmware')}
 webUrl = urllib.request.urlopen(Domoticz_url + urllib.parse.urlencode(getVars))
 print(Domoticz_url + urllib.parse.urlencode(getVars))
-
+'''
 
 #inverter values
 inverters = data.get('inverters')
@@ -106,7 +107,7 @@ for i in range(Inverter_qty):
       power = data['inverters'][Inverter]['DC_power'][x]
       print('Power (DC) panel ' + str(x + 1) + ': ' + str(power) + ' W')
 
-
+'''
 if Domoticz_url == '' :
       #upload values to Domoticz for inverter 1
       if (i == 0) and (x == 0) :
@@ -161,3 +162,4 @@ if Domoticz_url == '' :
       elif (i == 1) and (x == 1) :
          getVars = {'type' : 'command', 'param' : 'user_device', 'num_value' : 0, 'idx': ConsumptionPanel4, 'str_value': (power)}
          webUrl = urllib.request.urlopen(Domoticz_url + urllib.parse.urlencode(getVars) + (semicolon) + '0')
+'''
