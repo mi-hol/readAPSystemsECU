@@ -44,7 +44,7 @@ class APSystemsECU:
     def query_ecu(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((self.ip_addr,self.port))
-
+        # ToDo : handle timeout / connection error with a better error message
         sock.send(self.ecu_query.encode('utf-8'))
         self.ecu_raw_data = sock.recv(self.recv_size)
 
@@ -261,7 +261,7 @@ class APSystemsECU:
 
 if __name__ == "__main__":
 
-    # ToDo: enter the correct IP address of ECU below
+    # ToDo: use runtime parameter for IP address of ECU 
     ecu = APSystemsECU("192.168.0.248")
 
     # get inverter data by querying the ecu directly

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# tested with Python 3.12.8
+
 import asyncio
 import socket
 import binascii
@@ -275,8 +277,8 @@ class APSystemsECU:
 
         output = {}
 
-        timestamp = self.aps_timestamp(data, 19, 14)
         inverter_qty = self.aps_int(data, 17)
+        timestamp = self.aps_timestamp(data, 19, 14)
 
         self.last_update = timestamp
         output["timestamp"] = timestamp
@@ -352,10 +354,10 @@ class APSystemsECU:
         return (output, cnt2)
 
     def process_yc600_ds3(self, data, cnt2):
-        print ("process_yc600_ds3")
-        print ("cnt2:", cnt2)
-        # print ("data:", data)
-        print(f"data(hex): {data.hex()}")
+        # TODO: add runtime parameter "-debug" to show debug output
+        #print ("process_yc600_ds3")
+        #print ("cnt2:", cnt2)
+        #print(f"data(hex): {data.hex()}")
         power = []
         voltages = []
         currents = []

@@ -1,0 +1,48 @@
+PS C:\Users\mholzer> ."C:\Program Files\Python312\python.exe" "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py"
+C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py:45: DeprecationWarning: There is no current event loop
+  loop = asyncio.get_event_loop()
+Traceback (most recent call last):
+  File "C:\Program Files\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\APSystemsECU.py", line 82, in async_read_from_socket
+    self.read_buffer = await self.reader.readline()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\streams.py", line 568, in readline
+    line = await self.readuntil(sep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\streams.py", line 660, in readuntil
+    await self._wait_for_data('readuntil')
+  File "C:\Program Files\Python312\Lib\asyncio\streams.py", line 545, in _wait_for_data
+    await self._waiter
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\APSystemsECU.py", line 101, in async_send_read_from_socket
+    return await asyncio.wait_for(self.async_read_from_socket(), timeout=self.timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\tasks.py", line 519, in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py", line 48, in <module>
+    data = loop.run_until_complete(ecu.async_query_ecu())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\APSystemsECU.py", line 124, in async_query_ecu
+    self.ecu_raw_data = await self.async_send_read_from_socket(cmd)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\APSystemsECU.py", line 106, in async_send_read_from_socket
+    raise APSystemsInvalidData(msg)
+APSystemsECU.APSystemsInvalidData: Timeout after {self.timeout}s waiting or ECU data cmd={cmd.rstrip()}. Closing socket.
+PS C:\Users\mholzer> ."C:\Program Files\Python312\python.exe" "C:\Users\mholzer\Documents\0_BalkonPV_Technik\readAPSystemsECU\ECU_B.py"

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# tested with Python 3.12.8
 # original source: https://github.com/Doudou14/Domoticz-apsystems_ecu/blob/main/ECU/ECU_B.py
 # important findings reverse engineering APSystems ECU communication are in https://community.home-assistant.io/t/apsystems-aps-ecu-r-local-inverters-data-pull/260835/238
  
@@ -14,9 +15,11 @@ from pprint import pprint
 #////////// START USER CONFIGURATION \\\\\\\\\\
 
 #Change your ECU IP
+# TODO: make IP address a runtime parameter "-tcp"
 ecu_ip = "192.168.0.248"
 
 #Change your Domoticz IP
+# TODO: make URL address a runtime parameter "-url"
 #url = 'http://IP-Domoticz:8080/json.htm?'
 
 #Change your idx
@@ -48,17 +51,18 @@ ecu = APSystemsECU(ecu_ip)
 data = loop.run_until_complete(ecu.async_query_ecu())
 
 #to debug data sent via JSON uncomment pprint
-pprint(data)
+# TODO: add runtime parameter "-debug" to show debug output
+#pprint(data)
 
-#lifetime_energy = str(data.get('lifetime_energy')*1000)
+
+timestamp = str(data.get('timestamp'))
 lifetime_energy = str(data.get('lifetime_energy'))
-#today_energy = str(data.get('today_energy')*1000)
 today_energy = str(data.get('today_energy'))
-print('Today energy : ' + today_energy + ' kWh')
-current_power = str(data.get('current_power'))
 # Todo: correct AC power extraction
+current_power = str(data.get('current_power'))
+print('Inverter data supplied timestamp : ' + timestamp)
 print('Current total power (DC): ' + current_power + ' W')
-#generated_energy = (current_power + semicolon + lifetime_energy)
+print('Today energy : ' + today_energy + ' kWh')
 print('Total energy : ' + lifetime_energy + ' kWh')
 
 """ 
@@ -75,7 +79,10 @@ print(url + urllib.parse.urlencode(getVars))
 inverters = data.get('inverters')
 #count number of inverters
 Inverter_qty = len(data.get('inverters'))
-print('Number inverter: ' + str(Inverter_qty))
+# Counts the number of online inverters connected to the ECU.
+qty_of_online_inverters = (data.get('qty_of_online_inverters'))
+print('Number of inverter(s) linked to ECU: ' + str(Inverter_qty))
+print('Number of linked inverter(s) online: ' + str(qty_of_online_inverters))
 # loop trough all inverters and get the data
 for i in range(Inverter_qty):
    Inverter = list(inverters.keys())[i]
@@ -83,9 +90,9 @@ for i in range(Inverter_qty):
    InverterFrequency = data['inverters'][Inverter]['frequency']
    print('Frequency: ' + str(InverterFrequency) + ' Hz')
    InverterSignal = data['inverters'][Inverter]['signal']
-   print('Signal: ' + str(InverterSignal) + ' %')
+   print('WiFi Signal: ' + str(InverterSignal) + ' %')
    InverterTemperature = data['inverters'][Inverter]['temperature']
-   print('Temperature: ' + str(InverterTemperature) + ' °C')
+   print('Inverter Temperature: ' + str(InverterTemperature) + ' °C')
    nPower = len(data['inverters'][Inverter]['DC_power'])
    nVoltage = len(data['inverters'][Inverter]['DC_voltage'])
    voltage = data['inverters'][Inverter]['DC_voltage'][0]
