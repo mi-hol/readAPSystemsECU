@@ -21,7 +21,7 @@ read inverter values from APSystems ECUs on any computer having a python3 instal
 
 ```
 PS C:\Users\U1> ."C:\Users\U1\Documents\readAPSystemsECU\ECU_B.py"
-Inverter data supplied timestamp : 2024-12-14 13:45:28
+Inverter data timestamp : 2024-12-14 13:45:28
 Current total power (DC): 80 W  
 Today energy : 0.92 kWh
 ...
